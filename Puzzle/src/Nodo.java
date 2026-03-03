@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class Nodo {
+public class Nodo implements Comparable<Nodo> {
 	String estado;
 	private Nodo padre;
 	private int nivel, costo;
@@ -31,8 +31,10 @@ public class Nodo {
 		return costo;
 	}
 	
+
 	public List<Nodo> generarSucesores() {
-		String[] estadoHijos = Puzzle8.generarSucesores(estado);
+		//String[] estadoHijos = Puzzle8.generarSucesores(estado);
+		String[] estadoHijos = Puzzle25.generarSucesores(estado);
 		List<Nodo> sucesores = new ArrayList<Nodo>();
 		for(String estadoHijo: estadoHijos) {
 			if(estadoHijo != null) {
@@ -42,48 +44,58 @@ public class Nodo {
 		}
 		return sucesores;
 	}
-/*	public void impirmir() {
-		if(this.padre != null) {
-			this.padre.impirmir();
-		}
-		for(int i=0; i<9; i++) {
-			System.out.print(this.estado.charAt(i));
-			if((i+1) % 3 == 0 ) {
-				System.out.println();
-			}
-		}
-		System.out.println("Nivel: "+this.nivel);
-		System.out.println("*********************");
-	}
-         */
 
-    public void impirmir() {
-        if (padre != null) {
-            padre.impirmir();
-        }
-
-        for(int i = 0; i < 9; i++) {
-            System.out.print(estado.charAt(i));
-            if((i+1) % 3 == 0) System.out.println();
-        }
-
-        System.out.println("Nivel: " + nivel);
-        System.out.println("*********************");
+	public void imprimir() {
+    if (padre != null) {
+        padre.imprimir();
     }
 
-private void imprimirSeguro(Nodo nodo, HashSet<String> visitados){
-    if(nodo == null || visitados.contains(nodo.estado)) return;
+    String[] piezas = estado.split("-");
+    int size = (int) Math.sqrt(piezas.length); 
 
-    visitados.add(nodo.estado);
+    System.out.println("Nivel: " + nivel);
+    System.out.println("-------------------------");
 
-    imprimirSeguro(nodo.padre, visitados);
-
-    for(int i=0; i<9; i++) {
-        System.out.print(nodo.estado.charAt(i));
-        if((i+1) % 3 == 0) System.out.println();
+    for (int i = 0; i < piezas.length; i++) {
+        System.out.printf("%4s", piezas[i]); 
+        if ((i + 1) % size == 0) {
+            System.out.println();
+        }
     }
-    System.out.println("Nivel: "+nodo.nivel);
-    System.out.println("*********************");
+
+    System.out.println("-------------------------");
+	System.out.println("Costo (g): " + nivel);
+	System.out.println("Heurística (h): " + getHeuristica());
+	System.out.println("Función f(n) = g(n) + h(n): " + getF());
+
+    System.out.println("-------------------------\n");
 }
-    
+        
+
+public int getHeuristica() {
+    //return Puzzle25.manhattan(estado);
+	return Puzzle25.manhattanMasConflicto(this.estado);
+}
+
+public int getF() {
+    return nivel + getHeuristica();
+}
+
+public int longitudSolucion() {
+    int movimientos = 0;
+    Nodo actual = this;
+
+    while (actual.padre != null) {
+        movimientos++;
+        actual = actual.padre;
+    }
+
+    return movimientos;
+}
+
+@Override
+public int compareTo(Nodo otro) {
+    return Integer.compare(this.getF(), otro.getF());
+}
+
 }
